@@ -1,3 +1,9 @@
 from django.contrib import admin
+#from django.contrib.admin import display
 
-# Register your models here.
+from recipes.models import Tag
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'color', 'slug',)
