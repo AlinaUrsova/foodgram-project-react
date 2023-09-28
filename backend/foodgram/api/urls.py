@@ -3,13 +3,15 @@ from django.contrib import admin
 from django.urls import path, include
 from api.views import index, CustomUserViewSet, TagViewSet, RecipeViewSet
 
-router = routers.DefaultRouter()
-router.register('users', CustomUserViewSet)
-router.register('tags', TagViewSet)
-router.register('recipes', RecipeViewSet)
+app_name = 'api'
+
+router_v1 = routers.DefaultRouter()
+router_v1.register('users', CustomUserViewSet)
+router_v1.register('tags', TagViewSet)
+router_v1.register('recipes', RecipeViewSet)
 
 urlpatterns = [
-    path('index', index),
+    path('', include(router_v1.urls)),
+    path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    path('', include(router.urls)),
 ]
