@@ -1,9 +1,17 @@
-from rest_framework.permissions import SAFE_METHODS, BasePermission
+from rest_framework import permissions
 
 
-class IsOwnerOrReadOnly(BasePermission):
+class RecipePermission(permissions.BasePermission):
+    """Custom permission class"""
+    def has_permission(self, request, view):
+        """Authorised or read only"""
+        return (request.method in permissions.SAFE_METHODS
+                or request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            return True
-        return obj.author == request.user
+        """Unsave methods and GET method for shopping lists"""
+        return (
+            request.method in permissions.SAFE_METHODS
+            or (request.user.is_authenticated
+                and (obj.author == request.user or request.method == 'POST'))
+        )
