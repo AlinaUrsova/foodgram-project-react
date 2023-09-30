@@ -1,10 +1,15 @@
-from django.shortcuts import render, HttpResponse
+from django.contrib.auth import get_user_model
+from django.shortcuts import HttpResponse
 from djoser.views import UserViewSet
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from api.serializers import (TagSerializer, RecipeSerializer, 
-                             IngredientSerializer, RecipeCreateSerializer)
+                             IngredientSerializer, RecipeCreateSerializer,
+                             CustomUserSerializer)
 from recipes.models import Tag, Recipe, Ingredient
+#from users.models import User
 from api.permissions import RecipePermission
+
+User = get_user_model()
 
 def index(request):
     return HttpResponse('index')
@@ -44,5 +49,12 @@ class RecipeViewSet(ModelViewSet):
         if self.action == 'create':
             return RecipeCreateSerializer
         return RecipeSerializer
+
+
+class CustomUserViewSet(UserViewSet):
+    """Вьюсет для создания обьектов класса User."""
+
+    quryset = User.objects.all()
+    serializer_class = CustomUserSerializer
 
 
