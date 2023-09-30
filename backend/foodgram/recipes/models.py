@@ -15,7 +15,7 @@ class Tag(models.Model):
                             unique=True)
 
 
-class Ingridient(models.Model):
+class Ingredient(models.Model):
     """ Модель Ингридиента."""
 
     name = models.CharField(
@@ -42,8 +42,8 @@ class Recipe(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Автор',
     )
-    ingridients = models.ManyToManyField(
-        Ingridient,
+    ingredients = models.ManyToManyField(
+        Ingredient,
         related_name='recipes',
         verbose_name='Ингридиенты',
         through='IngredientRecipes',
@@ -52,7 +52,7 @@ class Recipe(models.Model):
                             max_length=200)
     image = models.ImageField(
          verbose_name= 'изображение',
-         upload_to='rescipes/',
+         upload_to='recipes/',
     )
     text = models.TextField(verbose_name='описание')
     cooking_time = models.PositiveIntegerField(
@@ -67,7 +67,7 @@ class IngredientRecipes(models.Model):
     ''' Промежуточная модель для связи ингридиента и рецепта.'''
 
     ingredient = models.ForeignKey(
-        Ingridient,
+        Ingredient,
         on_delete=models.CASCADE,
         related_name='ingredientrecipe',
         verbose_name='Ингредиент',

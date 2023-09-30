@@ -1,7 +1,7 @@
 from django.contrib import admin
 #from django.contrib.admin import display
 
-from recipes.models import Tag, Recipe, Ingridient, IngredientRecipes
+from recipes.models import Tag, Recipe, Ingredient, IngredientRecipes
 
 
 @admin.register(Tag)
@@ -27,7 +27,7 @@ class ReceptAdmin(admin.ModelAdmin):
     )
     inlines = (RecipeIngredientInline, )
 
-@admin.register(Ingridient)
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'name',

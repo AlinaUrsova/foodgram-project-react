@@ -6,8 +6,8 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.serializers import (TagSerializer, RecipeSerializer, 
                              IngredientSerializer)
-from recipes.models import Tag, Recipe, Ingridient
-from api.permissions import RecipePermission
+from recipes.models import Tag, Recipe, Ingredient
+#from api.permissions import RecipePermission
 
 def index(request):
     return HttpResponse('index')
@@ -22,7 +22,7 @@ class TagViewSet(ModelViewSet):
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     """Обрабатываем запросы к модели ингредиентов."""
-    queryset = Ingridient.objects.all()
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
 
