@@ -1,7 +1,6 @@
 import base64
 import uuid
 
-from typing import Dict, List
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
@@ -152,7 +151,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     '''
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientRecipesSerializer(
-        many=True, source='amount_ingredients'
+        many=True, source='amount_ingredients',
+        read_only=True,
     )
     author = CustomUserSerializer(read_only=True)
     image = Base64ImageField()
@@ -169,8 +169,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
-
-
+    
 class RecipeCreateSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для модели Recipe.
@@ -180,7 +179,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
         many=True
     )
-    ingredients = RecipteIngredientCreateSerializer(many=True)
+    ingredients = RecipteIngredientCreateSerializer(many=True,)
     author = CustomUserSerializer(read_only=True)
     image = Base64ImageField()
 
@@ -240,6 +239,18 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             recipe,
         )
 
+    #@transaction.atomic
+    #def update(self, instance, validated_data):
+    #    if 'ingredients' in validated_data:
+    #        ingredients = validated_data.pop('ingredients')
+    #        instance.ingredients.clear()
+    #        self.create_ingredients(ingredients, instance)
+    #    if 'tags' in validated_data:
+    #        instance.tags.set(
+    #            validated_data.pop('tags'))
+    #    return super().update(
+    #        instance, validated_data)
+
     @transaction.atomic
     def update(self, instance, validated_data):
         if 'ingredients' in validated_data:
@@ -251,3 +262,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 validated_data.pop('tags'))
         return super().update(
             instance, validated_data)
+    
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeCreateSerializer(instance,
+                                    context=context).data

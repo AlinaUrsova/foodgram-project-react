@@ -1,13 +1,17 @@
+from http import HTTPStatus
+
 from django.contrib.auth import get_user_model
 from django.shortcuts import HttpResponse
 from djoser.views import UserViewSet
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.response import Response
 from api.serializers import (TagSerializer, RecipeSerializer, 
                              IngredientSerializer, RecipeCreateSerializer,
                              CustomUserSerializer)
 from recipes.models import Tag, Recipe, Ingredient
 #from users.models import User
 from api.permissions import AuthorOrReadOnly, AdminOrReadOnly
+from rest_framework.permissions import SAFE_METHODS
 
 User = get_user_model()
 
@@ -33,12 +37,6 @@ class RecipeViewSet(ModelViewSet):
     permission_classes = [AuthorOrReadOnly,]
     ordering_fields = ()
 
-    #def get_queryset(self):
-    #    recipes = Recipe.objects.prefetch_related(
-    #        'amount_ingredients__ingredient', 'tags'
-    #    ).all()
-    #    return recipes
-
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
     
@@ -49,7 +47,7 @@ class RecipeViewSet(ModelViewSet):
         if self.action == 'create':
             return RecipeCreateSerializer
         return RecipeSerializer
-
+    
 
 class CustomUserViewSet(UserViewSet):
     """Вьюсет для создания обьектов класса User."""
