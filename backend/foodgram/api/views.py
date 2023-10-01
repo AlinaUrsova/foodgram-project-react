@@ -35,9 +35,14 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(ModelViewSet):
-    queryset = Recipe.objects.all()
     permission_classes = [AuthorOrReadOnly,]
     ordering_fields = ()
+
+    def get_queryset(self):
+        recipes = Recipe.objects.prefetch_related(
+            'amount_ingredients__ingredient', 'tags'
+        ).all()
+        return recipes
 
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
