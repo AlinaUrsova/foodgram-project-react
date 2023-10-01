@@ -69,7 +69,7 @@ class IngredientRecipes(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='amount_ingredients',
+        related_name='ingredient',
         verbose_name='Ингредиент',
     )
     recipe = models.ForeignKey(Recipe, 
@@ -82,3 +82,10 @@ class IngredientRecipes(models.Model):
         validators=[MinValueValidator
                     (1, 'Количество должно быть равно хотя бы одному')]
     )
+
+
+    class Meta:
+        verbose_name = ('Ингредиент')
+        verbose_name_plural = ('Ингредиенты')
+        ordering = ('id',)
+        unique_together = ('recipe', 'ingredient')
