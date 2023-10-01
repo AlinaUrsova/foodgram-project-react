@@ -7,16 +7,12 @@ from api.serializers import (TagSerializer, RecipeSerializer,
                              CustomUserSerializer)
 from recipes.models import Tag, Recipe, Ingredient
 #from users.models import User
-from api.permissions import RecipePermission
+from api.permissions import AuthorOrReadOnly, AdminOrReadOnly
 
 User = get_user_model()
 
 def index(request):
     return HttpResponse('index')
-
-
-class CustomUserViewSet(UserViewSet):
-    pass
 
 
 class TagViewSet(ModelViewSet):
@@ -33,7 +29,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(ModelViewSet):
-    permission_classes = [RecipePermission]
+    permission_classes = [AuthorOrReadOnly, AdminOrReadOnly]
     ordering_fields = ()
 
     def get_queryset(self):

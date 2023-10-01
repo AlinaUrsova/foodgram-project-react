@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework.fields import SerializerMethodField
-from djoser.serializers import UserSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from recipes.models import Tag, IngredientRecipes, Ingredient, Recipe
 from users.models import Subscription
@@ -144,6 +144,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
+    """Сериализатор для модели User."""
+
     is_subscribed = SerializerMethodField()
 
     class Meta:
@@ -165,3 +167,33 @@ class CustomUserSerializer(UserSerializer):
             user=user,
             author=obj
         ).exists()
+
+
+class CustomUserCreateSerializer(UserCreateSerializer):
+    """Сериализатор для создания объекта класса User."""
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'password'
+        )
+
+    def validate(self, data):
+        if data.get('username') == 'me':
+            raise serializers.ValidationError(
+                'Использовать имя me запрещено'
+            )
+        if User.objects.filter(username=data.get('username')):
+            raise serializers.ValidationError(
+                'Пользователь с таким username уже существует'
+            )
+        if User.objects.filter(email=data.get('email')):
+            raise serializers.ValidationError(
+                'Пользователь с таким email уже существует'
+            )
+        return data
