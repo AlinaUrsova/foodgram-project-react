@@ -11,7 +11,7 @@ from rest_framework.fields import  SerializerMethodField
 from django.db.transaction import atomic
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import Tag, IngredientRecipes, Ingredient, Recipe, Favorite
+from recipes.models import Tag, IngredientRecipes, Ingredient, Recipe, Favorite, ShoppingCart
 from users.models import Subscription
 
 User = get_user_model()
@@ -158,6 +158,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
@@ -170,7 +171,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name',
             'text',
             'cooking_time',
-            'is_favorited'
+            'is_favorited',
+            'is_in_shopping_cart',
         )
     
     def get_is_favorited(self, object):
@@ -180,6 +182,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return request.user.favoriting.filter(recipe=object).exists()
     
+    def get_is_in_shopping_cart(self, object):
+        """Проверяет, добавил ли пользователь
+        рецепт в список покупок."""
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return request.user.shopping_cart.filter(recipe=object).exists()
+
+
 class RecipeCreateSerializer(serializers.ModelSerializer):
     '''
     Сериализатор для модели Recipe.
@@ -265,5 +276,19 @@ class FavoriteSerializer(serializers.ModelSerializer):
                 queryset=Favorite.objects.all(),
                 fields=('user', 'recipe'),
                 message='Вы уже добавили это рецепт в избранное.'
+            )
+        ]
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериализатор модели ShoppingCart."""
+
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'recipe'),
+                message='Вы уже добавили это рецепт в список покупок.'
             )
         ]

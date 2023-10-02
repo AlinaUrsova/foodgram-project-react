@@ -122,3 +122,34 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f'{self.user} добавил в избранное {self.recipe}!'
+    
+
+class ShoppingCart(models.Model):
+    """Класс составления списка покупок."""
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Рецепт'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Пользователь'
+    )
+
+    class Meta:
+        verbose_name = 'Рецепт пользователя для списка покупок'
+        verbose_name_plural = 'Рецепты пользователей для списка покупок'
+        ordering = ('user',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_shopping_cart'
+            ),
+        )
+
+    def __str__(self):
+        return f'{self.recipe} в списке покупок у {self.user}'

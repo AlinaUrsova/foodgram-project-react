@@ -1,4 +1,3 @@
-#from http import HTTPStatus
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.shortcuts import HttpResponse
@@ -11,14 +10,16 @@ from rest_framework.response import Response
 from api.serializers import (TagSerializer, RecipeSerializer, 
                              IngredientSerializer, RecipeCreateSerializer,
                              CustomUserSerializer,
-                             RecipeShortSerializer, FavoriteSerializer)
-from recipes.models import Tag, Recipe, Ingredient, Favorite
+                             RecipeShortSerializer, FavoriteSerializer,
+                             ShoppingCartSerializer)
+from recipes.models import Tag, Recipe, Ingredient, Favorite, IngredientRecipes, ShoppingCart
 #from users.models import User
 from api.permissions import AuthorOrReadOnly
 from api.filters import RecipeFilter, IngredientFilter
 #from rest_framework.permissions import SAFE_METHODS
 from rest_framework.decorators import action
 from rest_framework import permissions
+
 
 User = get_user_model()
 
@@ -124,3 +125,39 @@ class FavoriteViewSet(viewsets.ViewSet):
         )
         favorite_recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ShoppingCartViewSet(viewsets.ViewSet):
+    """Вьюсет для взаимодействий со списком покупок"""
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ShoppingCartSerializer
+    pagination_class = None
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        url_path='shopping_cart',
+        url_name='shopping_cart',
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def action_recipe_in_cart(self, request, pk):
+        """Позволяет пользователю добавлять/удалять рецепты
+        в|из список покупок."""
+        recipe = get_object_or_404(Recipe, pk=pk)
+        if request.method == 'POST':
+            serializer = ShoppingCartSerializer(
+                data={'user': request.user.id, 'recipe': recipe.id}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            shopping_cart_serializer = RecipeShortSerializer(recipe)
+            return Response(
+                shopping_cart_serializer.data, status=status.HTTP_201_CREATED
+            )
+        shopping_cart_recipe = get_object_or_404(
+            ShoppingCart, user=request.user, recipe=recipe
+        )
+        shopping_cart_recipe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
