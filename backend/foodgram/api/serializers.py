@@ -90,6 +90,8 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             )
         return data
 
+class SubscriptionSerializer(ModelSerializer):
+    pass
 
 class TagSerializer(ModelSerializer):
     """ Сериализатор для модели Тэг."""

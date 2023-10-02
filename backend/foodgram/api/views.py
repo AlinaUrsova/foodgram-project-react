@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.shortcuts import HttpResponse
@@ -11,7 +12,7 @@ from api.serializers import (TagSerializer, RecipeSerializer,
                              IngredientSerializer, RecipeCreateSerializer,
                              CustomUserSerializer,
                              RecipeShortSerializer, FavoriteSerializer,
-                             ShoppingCartSerializer)
+                             ShoppingCartSerializer, SubscriptionSerializer)
 from recipes.models import Tag, Recipe, Ingredient, Favorite, IngredientRecipes, ShoppingCart
 #from users.models import User
 from api.permissions import AuthorOrReadOnly
@@ -19,6 +20,7 @@ from api.filters import RecipeFilter, IngredientFilter
 #from rest_framework.permissions import SAFE_METHODS
 from rest_framework.decorators import action
 from rest_framework import permissions
+from api.utils import create_shopping_cart
 
 
 User = get_user_model()
@@ -95,6 +97,11 @@ class CustomUserViewSet(UserViewSet):
         else:
             return Response(serializer.errors, status=400)
 
+class SubscriptionViewSet(viewsets.ViewSet):
+    """Вьюсет подписки и отписки на|от авторов"""
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SubscriptionSerializer
+
 
 class FavoriteViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -160,4 +167,25 @@ class ShoppingCartViewSet(viewsets.ViewSet):
         )
         shopping_cart_recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='download_shopping_cart',
+        url_name='download_shopping_cart',
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def download_shopping_cart(self, request):
+        """Позволяет пользователю загрузить список покупок."""
+        ingredients_cart = (
+            IngredientRecipes.objects.filter(
+                recipe__shopping_cart__user=request.user
+            ).values(
+                'ingredient__name',
+                'ingredient__measurement_unit',
+            ).order_by(
+                'ingredient__name'
+            ).annotate(ingredient_value=Sum('amount'))
+        )
+        return create_shopping_cart(ingredients_cart)
 

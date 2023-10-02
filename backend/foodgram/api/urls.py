@@ -23,8 +23,8 @@ urlpatterns = [
          ShoppingCartViewSet.as_view({'post': 'action_recipe_in_cart',
                                       'delete': 'action_recipe_in_cart'}),
          name='add_shopping_cart-remove_shopping_cart'),
-    #path('recipes/download_shopping_cart/', ShoppingCartViewSet.as_view(
-    #    {'get': 'download_shopping_cart'}), name='download_shopping_cart'),
+    path('recipes/download_shopping_cart/', ShoppingCartViewSet.as_view(
+        {'get': 'download_shopping_cart'}), name='download_shopping_cart'),
     path('', include(router_v1.urls)),
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
