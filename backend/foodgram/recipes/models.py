@@ -1,7 +1,8 @@
-#from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator
+
 from users.models import User
+
 
 class Tag(models.Model):
     """ Модель Тэг."""
@@ -63,6 +64,7 @@ class Recipe(models.Model):
         )
     )
 
+
 class IngredientRecipes(models.Model):
     ''' Промежуточная модель для связи ингридиента и рецепта.'''
 
@@ -89,3 +91,34 @@ class IngredientRecipes(models.Model):
         verbose_name_plural = ('Ингредиенты')
         ordering = ('id',)
         unique_together = ('recipe', 'ingredient')
+
+
+class Favorite(models.Model):
+    ''' Модель для избранных рецептов.'''
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favoriting',
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favoriting',
+        verbose_name='Рецепт'
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+        ordering = ('id',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite_recipe'
+            ),
+        )
+
+    def __str__(self):
+        return f'{self.user} добавил в избранное {self.recipe}!'

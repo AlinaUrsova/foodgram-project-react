@@ -9,9 +9,9 @@ from django.core.files.base import ContentFile
 from rest_framework.fields import  SerializerMethodField
 #from django.db import transaction
 from django.db.transaction import atomic
-from django.core.exceptions import ValidationError
+from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import Tag, IngredientRecipes, Ingredient, Recipe
+from recipes.models import Tag, IngredientRecipes, Ingredient, Recipe, Favorite
 from users.models import Subscription
 
 User = get_user_model()
@@ -230,3 +230,31 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         context = {'request': request}
         return RecipeSerializer(instance,
                                     context=context).data
+
+
+class RecipeShortSerializer(serializers.ModelSerializer):
+    """Сериализатор компактного отображения рецептов."""
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор модели Favorite."""
+
+    class Meta:
+        model = Favorite
+        fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('user', 'recipe'),
+                message='Вы уже добавили это рецепт в избранное.'
+            )
+        ]

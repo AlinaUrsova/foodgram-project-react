@@ -1,7 +1,7 @@
 from django.contrib import admin
 #from django.contrib.admin import display
 
-from recipes.models import Tag, Recipe, Ingredient, IngredientRecipes
+from recipes.models import Tag, Recipe, Ingredient, IngredientRecipes, Favorite
 
 
 @admin.register(Tag)
@@ -34,3 +34,7 @@ class IngredientAdmin(admin.ModelAdmin):
         'measurement_unit',
     )
     list_filter = ('name',)
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe')
