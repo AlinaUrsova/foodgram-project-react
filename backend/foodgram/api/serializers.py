@@ -157,6 +157,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     author = CustomUserSerializer(read_only=True)
     image = Base64ImageField()
+    is_favorited = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
@@ -169,7 +170,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name',
             'text',
             'cooking_time',
+            'is_favorited'
         )
+    
+    def get_is_favorited(self, object):
+        """Проверяет, добавил ли пользователь рецепт в избанное."""
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return request.user.favoriting.filter(recipe=object).exists()
     
 class RecipeCreateSerializer(serializers.ModelSerializer):
     '''
