@@ -3,10 +3,10 @@ from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet
-from rest_framework import status, viewsets, exceptions
+from rest_framework import status, viewsets, exceptions, response, decorators, permissions
 from djoser.serializers import SetPasswordSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.response import Response
+
 from api.serializers import (TagSerializer, RecipeSerializer, 
                              IngredientSerializer, RecipeCreateSerializer,
                              CustomUserSerializer,
@@ -16,8 +16,6 @@ from recipes.models import Tag, Recipe, Ingredient, Favorite, IngredientRecipes,
 from users.models import Subscription
 from api.permissions import AuthorOrReadOnly
 from api.filters import RecipeFilter, IngredientFilter
-from rest_framework.decorators import action
-from rest_framework import permissions
 from api.utils import create_shopping_cart
 from api.pagination import CustomPagination
 
@@ -77,7 +75,7 @@ class CustomUserViewSet(UserViewSet):
     serializer_class = CustomUserSerializer
     pagination_class = CustomPagination
 
-    @action(detail=False, methods=['POST'])
+    @decorators.action(detail=False, methods=['POST'])
     def set_password(self, request):
         serializer = SetPasswordSerializer(
             data=request.data,
@@ -91,14 +89,14 @@ class CustomUserViewSet(UserViewSet):
             if self.request.user.check_password(current_password):
                 self.request.user.set_password(new_password)
                 self.request.user.save()
-                return Response(status=204)
+                return response.Response(status=204)
             else:
-                return Response({'detail': 'Пароли не совпадают.'},
+                return response.Response({'detail': 'Пароли не совпадают.'},
                                 status=400)
         else:
-            return Response(serializer.errors, status=400)
+            return response.Response(serializer.errors, status=400)
     
-    @action(
+    @decorators.action(
         detail=False,
         methods=['GET'],
         serializer_class=SubscriptionSerializer,
@@ -113,7 +111,7 @@ class CustomUserViewSet(UserViewSet):
         serializer = self.get_serializer(paginated_queryset, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(
+    @decorators.action(
         methods=['POST', 'DELETE'],
         detail=True,
         serializer_class=SubscriptionSerializer
@@ -136,7 +134,7 @@ class CustomUserViewSet(UserViewSet):
             Subscription.objects.create(user=user, author=author)
             serializer = self.get_serializer(author)
 
-            return Response(serializer.data, status=HTTPStatus.CREATED)
+            return response.Response(serializer.data, status=HTTPStatus.CREATED)
 
         if self.request.method == 'DELETE':
             if not Subscription.objects.filter(
@@ -153,9 +151,9 @@ class CustomUserViewSet(UserViewSet):
             )
             subscription.delete()
 
-            return Response(status=HTTPStatus.NO_CONTENT)
+            return response.Response(status=HTTPStatus.NO_CONTENT)
 
-        return Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
+        return response.Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
 
 
 class FavoriteViewSet(viewsets.ViewSet):
@@ -164,7 +162,7 @@ class FavoriteViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FavoriteSerializer
 
-    @action(
+    @decorators.action(
         detail=True,
         methods=['post', 'delete'],
         url_path='favorite',
@@ -180,14 +178,14 @@ class FavoriteViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             favorite_serializer = RecipeShortSerializer(recipe)
-            return Response(
+            return response.Response(
                 favorite_serializer.data, status=status.HTTP_201_CREATED
             )
         favorite_recipe = get_object_or_404(
             Favorite, user=request.user, recipe=recipe
         )
         favorite_recipe.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ShoppingCartViewSet(viewsets.ViewSet):
@@ -197,7 +195,7 @@ class ShoppingCartViewSet(viewsets.ViewSet):
     serializer_class = ShoppingCartSerializer
     pagination_class = None
 
-    @action(
+    @decorators.action(
         detail=True,
         methods=['post', 'delete'],
         url_path='shopping_cart',
@@ -213,16 +211,16 @@ class ShoppingCartViewSet(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             shopping_cart_serializer = RecipeShortSerializer(recipe)
-            return Response(
+            return response.Response(
                 shopping_cart_serializer.data, status=status.HTTP_201_CREATED
             )
         shopping_cart_recipe = get_object_or_404(
             ShoppingCart, user=request.user, recipe=recipe
         )
         shopping_cart_recipe.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
     
-    @action(
+    @decorators.action(
         detail=False,
         methods=['get'],
         url_path='download_shopping_cart',
