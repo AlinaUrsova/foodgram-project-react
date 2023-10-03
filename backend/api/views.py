@@ -138,7 +138,8 @@ class CustomUserViewSet(UserViewSet):
                                      status=HTTPStatus.CREATED)
 
         if self.request.method == "DELETE":
-            if not Subscription.objects.filter(user=user, author=author).exists():
+            if not Subscription.objects.filter(
+                user=user, author=author).exists():
                 raise exceptions.ValidationError(
                     "Нет такой подписки")
             subscription = get_object_or_404(

@@ -51,8 +51,7 @@ class Recipe(models.Model):
         validators=(
             MinValueValidator(
                 limit_value=1,
-                message=
-                "Время не меньше минуты.",
+                message="Время",
             ),
         ),
     )
