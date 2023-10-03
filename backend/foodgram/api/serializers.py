@@ -17,7 +17,7 @@ from users.models import Subscription
 User = get_user_model()
 
 class Base64ImageField(serializers.ImageField):
-    """Serializer поля image"""
+    """ Сериализатор для поля image."""
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             img_format, img_str = data.split(';base64,')
@@ -36,7 +36,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 class CustomUserSerializer(UserSerializer):
-    """Сериализатор для модели User."""
+    """ Сериализатор для модели User."""
 
     is_subscribed = serializers.SerializerMethodField(
         method_name='get_is_subscribed'
@@ -64,7 +64,7 @@ class CustomUserSerializer(UserSerializer):
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    """Сериализатор для создания объекта класса User."""
+    """Сериализатор для модели User. Создание. """
 
     class Meta:
         model = User
@@ -93,6 +93,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         return data
 
 class SubscriptionSerializer(ModelSerializer):
+    """Сериализатор для модели Subscription. """
 
     recipes = serializers.SerializerMethodField(method_name='get_recipes')
     recipes_count = serializers.SerializerMethodField(
@@ -123,7 +124,7 @@ class SubscriptionSerializer(ModelSerializer):
             'recipes_count',
         )
 
-class RecipeFavoriteSerializer(serializers.ModelSerializer):
+class RecipeSubscriptionSerializer(serializers.ModelSerializer):
     """Сериализатор работает с моделью Recipe."""
     class Meta:
         model = Recipe
@@ -137,7 +138,7 @@ class RecipeFavoriteSerializer(serializers.ModelSerializer):
 class SubscriptionReadSerializer(UserSerializer):
     """Сериализатор для модели User."""
     
-    recipes = RecipeFavoriteSerializer(many=True, read_only=True)
+    recipes = RecipeSubscriptionSerializer(many=True, read_only=True)
     recipes_count = SerializerMethodField(read_only=True)
 
     class Meta(UserSerializer.Meta):
@@ -164,23 +165,12 @@ class TagSerializer(ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """ Сериализатор для получения данных из модели с ингрединтами."""
+    """ Сериализатор для модели Ingredient."""
 
     class Meta:
         fields = '__all__'
         model = Ingredient
         read_only_fields = '__all__',
-
-
-class IngredientDetaleSerializer(serializers.ModelSerializer):
-    """ Ингредиенты для рецепта """
-
-    id = IntegerField(write_only=True)
-    amount = IntegerField(write_only=True)
-
-    class Meta:
-        model = IngredientRecipes
-        fields = ('id', 'amount')
 
 
 class IngredientRecipesSerializer(ModelSerializer):
@@ -202,17 +192,6 @@ class IngredientRecipesSerializer(ModelSerializer):
             'measurement_unit',
             'amount'
         )
-
-
-class RecipteIngredientCreateSerializer(ModelSerializer):
-
-    id = serializers.IntegerField()
-    amount = serializers.IntegerField()
-
-
-    class Meta:
-        model = IngredientRecipes
-        fields = ('id', 'amount')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -246,19 +225,31 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
     
     def get_is_favorited(self, object):
-        """Проверяет, добавил ли пользователь рецепт в избанное."""
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
         return request.user.favoriting.filter(recipe=object).exists()
     
     def get_is_in_shopping_cart(self, object):
-        """Проверяет, добавил ли пользователь
-        рецепт в список покупок."""
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
         return request.user.shopping_cart.filter(recipe=object).exists()
+
+
+class RecipteIngredientCreateSerializer(ModelSerializer):
+    '''
+    Сериалайзер для модели Recipe.
+    Используется на отображение необходимых полей при чтеннии.
+    '''
+
+    id = serializers.IntegerField(write_only=True)
+    amount = serializers.IntegerField(write_only=True)
+
+
+    class Meta:
+        model = IngredientRecipes
+        fields = ('id', 'amount')
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):

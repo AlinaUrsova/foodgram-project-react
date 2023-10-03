@@ -8,8 +8,6 @@ from djoser.views import UserViewSet
 from rest_framework import status, viewsets, exceptions
 from djoser.serializers import SetPasswordSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-#from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-#from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from api.serializers import (TagSerializer, RecipeSerializer, 
                              IngredientSerializer, RecipeCreateSerializer,
@@ -20,7 +18,6 @@ from recipes.models import Tag, Recipe, Ingredient, Favorite, IngredientRecipes,
 from users.models import Subscription
 from api.permissions import AuthorOrReadOnly
 from api.filters import RecipeFilter, IngredientFilter
-#from rest_framework.permissions import SAFE_METHODS
 from rest_framework.decorators import action
 from rest_framework import permissions
 from api.utils import create_shopping_cart
@@ -34,13 +31,15 @@ def index(request):
 
 
 class TagViewSet(viewsets.ModelViewSet):
+    """Вьюсет для создания обьектов класса Tag."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Обрабатываем запросы к модели ингредиентов."""
+    """Вьюсет для создания обьектов класса Ingredient."""
+
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
@@ -51,6 +50,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """Вьюсет для создания обьектов класса Recipe."""
+
     permission_classes = [AuthorOrReadOnly,]
     ordering_fields = ()
     filter_backends = (DjangoFilterBackend,)
@@ -163,6 +164,8 @@ class CustomUserViewSet(UserViewSet):
 
 
 class FavoriteViewSet(viewsets.ViewSet):
+    """Вьюсет для создания обьектов класса Favorite."""
+
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FavoriteSerializer
 
@@ -174,7 +177,6 @@ class FavoriteViewSet(viewsets.ViewSet):
         permission_classes=(permissions.IsAuthenticated,)
     )
     def add_and_delete_favorite(self, request, pk):
-        """Позволяет пользователю добавлять|удалять рецепты в|из избранное."""
         recipe = get_object_or_404(Recipe, pk=pk)
         if request.method == 'POST':
             serializer = FavoriteSerializer(
@@ -194,7 +196,7 @@ class FavoriteViewSet(viewsets.ViewSet):
 
 
 class ShoppingCartViewSet(viewsets.ViewSet):
-    """Вьюсет для взаимодействий со списком покупок"""
+    """Вьюсет для создания обьектов класса ShoppingCart."""
 
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ShoppingCartSerializer
@@ -208,8 +210,6 @@ class ShoppingCartViewSet(viewsets.ViewSet):
         permission_classes=(permissions.IsAuthenticated,)
     )
     def action_recipe_in_cart(self, request, pk):
-        """Позволяет пользователю добавлять/удалять рецепты
-        в|из список покупок."""
         recipe = get_object_or_404(Recipe, pk=pk)
         if request.method == 'POST':
             serializer = ShoppingCartSerializer(
@@ -235,7 +235,6 @@ class ShoppingCartViewSet(viewsets.ViewSet):
         permission_classes=(permissions.IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        """Позволяет пользователю загрузить список покупок."""
         ingredients_cart = (
             IngredientRecipes.objects.filter(
                 recipe__shopping_cart__user=request.user
