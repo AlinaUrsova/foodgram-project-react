@@ -55,16 +55,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "foodgram.wsgi.application"
 
-# DATABASES = {
-#'default': {
-#'ENGINE': 'django.db.backends.postgresql',
-#'NAME': os.getenv('POSTGRES_DB', 'django'),
-#'USER': os.getenv('POSTGRES_USER', 'django'),
-#'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-#'HOST': os.getenv('DB_HOST', ''),
-#'PORT': os.getenv('DB_PORT', 5432)
-#    }
-# }
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -107,9 +98,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.User"
 
 REST_FRAMEWORK = {
-    #'DEFAULT_PERMISSION_CLASSES': [
-    #    'rest_framework.permissions.AllowAny',
-    # ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
@@ -121,8 +109,6 @@ DJOSER = {
     "LOGIN_FIELD": "email",
     "HIDE_USERS": False,
     "PERMISSIONS": {
-        # "resipe": ("api.permissions.AuthorOrReadOnly,",),
-        # "recipe_list": ("api.permissions.AuthorOrReadOnly",),
         "user": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
         "user_list": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
     },

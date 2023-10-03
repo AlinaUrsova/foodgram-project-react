@@ -2,10 +2,6 @@ from django.contrib import admin
 from recipes.models import (Favorite, Ingredient, IngredientRecipes, Recipe,
                             ShoppingCart, Tag)
 
-# from django.contrib.admin import display
-
-
-
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
