@@ -6,9 +6,15 @@ from users.models import User
 class Tag(models.Model):
     """Модель Тэг."""
 
-    name = models.CharField(verbose_name="Название", max_length=200)
-    color = models.CharField(verbose_name="Цвет", max_length=7)
-    slug = models.CharField(verbose_name="Уникальный слаг", max_length=200, unique=True)
+    name = models.CharField(
+        verbose_name="Название",
+        max_length=200)
+    color = models.CharField(
+        verbose_name="Цвет",
+        max_length=7)
+    slug = models.CharField(
+        verbose_name="Уникальный слаг",
+        max_length=200, unique=True)
 
 
 class Ingredient(models.Model):
@@ -18,13 +24,17 @@ class Ingredient(models.Model):
         max_length=200,
         verbose_name="Hазвание",
     )
-    measurement_unit = models.CharField(max_length=10, verbose_name="единица измерения")
+    measurement_unit = models.CharField(
+        max_length=10, 
+        verbose_name="единица измерения")
 
 
 class Recipe(models.Model):
     """Модель Рецепта."""
 
-    tags = models.ManyToManyField(Tag, related_name="recipes", verbose_name="Тэги")
+    tags = models.ManyToManyField(
+        Tag, related_name="recipes",
+        verbose_name="Тэги")
     author = models.ForeignKey(
         User,
         related_name="recipes",
@@ -37,7 +47,9 @@ class Recipe(models.Model):
         verbose_name="Ингридиенты",
         through="IngredientRecipes",
     )
-    name = models.CharField("Название", max_length=200)
+    name = models.CharField(
+        "Название",
+        max_length=200)
     image = models.ImageField(
         verbose_name="изображение",
         upload_to="recipes/",
@@ -119,7 +131,8 @@ class Favorite(models.Model):
         ordering = ("id",)
         constraints = (
             models.UniqueConstraint(
-                fields=["user", "recipe"], name="unique_favorite_recipe"
+                fields=["user", "recipe"],
+                name="unique_favorite_recipe"
             ),
         )
 
