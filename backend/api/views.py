@@ -1,9 +1,7 @@
 from http import HTTPStatus
-from django.http import HttpResponse
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from django.shortcuts import HttpResponse
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets, exceptions
 from djoser.serializers import SetPasswordSerializer
@@ -25,9 +23,6 @@ from api.pagination import CustomPagination
 
 
 User = get_user_model()
-
-def index(request):
-    return HttpResponse('index')
 
 
 class TagViewSet(viewsets.ModelViewSet):
