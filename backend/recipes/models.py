@@ -8,7 +8,8 @@ class Tag(models.Model):
 
     name = models.CharField(verbose_name="Название", max_length=200)
     color = models.CharField(verbose_name="Цвет", max_length=7)
-    slug = models.CharField(verbose_name="Уникальный слаг", max_length=200, unique=True)
+    slug = models.CharField(verbose_name="Уникальный слаг", 
+                            max_length=200, unique=True)
 
 
 class Ingredient(models.Model):
@@ -18,13 +19,15 @@ class Ingredient(models.Model):
         max_length=200,
         verbose_name="Hазвание",
     )
-    measurement_unit = models.CharField(max_length=10, verbose_name="единица измерения")
+    measurement_unit = models.CharField(max_length=10,
+                                        verbose_name="единица измерения")
 
 
 class Recipe(models.Model):
     """Модель Рецепта."""
 
-    tags = models.ManyToManyField(Tag, related_name="recipes", verbose_name="Тэги")
+    tags = models.ManyToManyField(Tag, related_name="recipes",
+                                  verbose_name="Тэги")
     author = models.ForeignKey(
         User,
         related_name="recipes",
@@ -48,7 +51,8 @@ class Recipe(models.Model):
         validators=(
             MinValueValidator(
                 limit_value=1,
-                message="Время приготовления не может быть менее одной минуты.",
+                message=f"Время приготовления не"
+                f"может быть менее одной минуты.",
             ),
         ),
     )
