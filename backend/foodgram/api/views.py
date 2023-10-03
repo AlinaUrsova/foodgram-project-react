@@ -15,8 +15,7 @@ from api.serializers import (TagSerializer, RecipeSerializer,
                              IngredientSerializer, RecipeCreateSerializer,
                              CustomUserSerializer,
                              RecipeShortSerializer, FavoriteSerializer,
-                             ShoppingCartSerializer, SubscriptionReadSerializer,
-                             SubscriptionSerializer)
+                             ShoppingCartSerializer, SubscriptionSerializer)
 from recipes.models import Tag, Recipe, Ingredient, Favorite, IngredientRecipes, ShoppingCart
 from users.models import Subscription
 from api.permissions import AuthorOrReadOnly
@@ -24,7 +23,7 @@ from api.filters import RecipeFilter, IngredientFilter
 #from rest_framework.permissions import SAFE_METHODS
 from rest_framework.decorators import action
 from rest_framework import permissions
-from api.utils import create_shopping_cart, create_object, delete_object
+from api.utils import create_shopping_cart
 from api.pagination import CustomPagination
 
 
@@ -70,7 +69,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.request.method == 'GET':
             return RecipeCreateSerializer
         return RecipeSerializer
     

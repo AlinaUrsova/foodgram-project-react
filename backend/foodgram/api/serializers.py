@@ -7,16 +7,14 @@ from rest_framework.serializers import ModelSerializer
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.core.files.base import ContentFile
 from rest_framework.fields import  SerializerMethodField
-from rest_framework.serializers import CurrentUserDefault
-#from django.db import transaction
 from django.db.transaction import atomic
 from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.fields import (IntegerField, SerializerMethodField)
 
 from recipes.models import Tag, IngredientRecipes, Ingredient, Recipe, Favorite, ShoppingCart
 from users.models import Subscription
 
 User = get_user_model()
-RECIPES_LIMIT = 6
 
 class Base64ImageField(serializers.ImageField):
     """Serializer поля image"""
@@ -174,14 +172,25 @@ class IngredientSerializer(serializers.ModelSerializer):
         read_only_fields = '__all__',
 
 
+class IngredientDetaleSerializer(serializers.ModelSerializer):
+    """ Ингредиенты для рецепта """
+
+    id = IntegerField(write_only=True)
+    amount = IntegerField(write_only=True)
+
+    class Meta:
+        model = IngredientRecipes
+        fields = ('id', 'amount')
+
+
 class IngredientRecipesSerializer(ModelSerializer):
     '''
     Сериалайзер для модели IngredientRecipes.
     Используется для коректного отображения полей ингредиента при чтении.
     '''
-    id = serializers.IntegerField(source='ingredient.id')
-    name = serializers.CharField(source='ingredient.name')
-    measurement_unit = serializers.CharField(
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
     )
 
@@ -305,13 +314,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         self.create_ingredients(recipe=instance, ingredients=ingredients)
         instance.save()
         return instance
-
     def to_representation(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
-        return RecipeSerializer(instance,
-                                    context=context).data
-
+        return RecipeSerializer(
+            instance, context={'request': self.context.get('request')}
+        ).data
+    
 
 class RecipeShortSerializer(serializers.ModelSerializer):
     """Сериализатор компактного отображения рецептов."""
