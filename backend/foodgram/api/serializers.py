@@ -7,6 +7,7 @@ from rest_framework.serializers import ModelSerializer
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.core.files.base import ContentFile
 from rest_framework.fields import  SerializerMethodField
+from rest_framework.serializers import CurrentUserDefault
 #from django.db import transaction
 from django.db.transaction import atomic
 from rest_framework.validators import UniqueTogetherValidator
@@ -15,6 +16,7 @@ from recipes.models import Tag, IngredientRecipes, Ingredient, Recipe, Favorite,
 from users.models import Subscription
 
 User = get_user_model()
+RECIPES_LIMIT = 6
 
 class Base64ImageField(serializers.ImageField):
     """Serializer поля image"""
@@ -38,7 +40,9 @@ class Base64ImageField(serializers.ImageField):
 class CustomUserSerializer(UserSerializer):
     """Сериализатор для модели User."""
 
-    is_subscribed = SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField(
+        method_name='get_is_subscribed'
+    )
 
     class Meta:
         model = User
@@ -52,8 +56,8 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        if user is None or user.is_anonymous:
+        user = self.context['request'].user
+        if user.is_anonymous:
             return False
         return Subscription.objects.filter(
             user=user,
@@ -91,7 +95,62 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         return data
 
 class SubscriptionSerializer(ModelSerializer):
-    pass
+
+    recipes = serializers.SerializerMethodField(method_name='get_recipes')
+    recipes_count = serializers.SerializerMethodField(
+        method_name='get_recipes_count',
+        read_only=True,
+    )
+
+    def get_recipes(self, obj):
+        author_recipes = Recipe.objects.filter(author=obj)
+        if 'recipes_limit' in self.context.get('request').GET:
+            recipes_limit = self.context.get('request').GET['recipes_limit']
+            author_recipes = author_recipes[:int(recipes_limit)]
+        return []
+
+    def get_recipes_count(self, obj):
+        return Recipe.objects.filter(author=obj).count()
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+        )
+
+class RecipeFavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор работает с моделью Recipe."""
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )
+
+class SubscriptionReadSerializer(UserSerializer):
+    """Сериализатор для модели User."""
+    
+    recipes = RecipeFavoriteSerializer(many=True, read_only=True)
+    recipes_count = SerializerMethodField(read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        fields = CustomUserSerializer.Meta.fields + ('recipes', 'recipes_count')
+
+    def get_recipes_count(self, obj):
+        '''Метод возвращает количество рецептов у автора рецептов
+          на которого подписался пользователь.
+          '''
+        return obj.recipes.count()
+
 
 class TagSerializer(ModelSerializer):
     """ Сериализатор для модели Тэг."""

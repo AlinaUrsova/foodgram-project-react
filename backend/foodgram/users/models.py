@@ -45,6 +45,11 @@ class User(AbstractUser):
         max_length=150,
         blank=False,
     )
+    is_subscribed = models.BooleanField(
+        default=False,
+        verbose_name='Подписка на автора',
+        help_text='Отметка о подписке на автора',
+    )
 
 class Subscription(models.Model):
     """ Модель подписок."""
@@ -53,7 +58,7 @@ class Subscription(models.Model):
         User,
         verbose_name='Подписчик',
         on_delete=models.CASCADE,
-        related_name='subscribers'
+        related_name='follower'
     )
     author = models.ForeignKey(
         User,
