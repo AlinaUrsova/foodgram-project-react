@@ -1,15 +1,8 @@
-from rest_framework import routers
+from api.views import (CustomUserViewSet, FavoriteViewSet, IngredientViewSet,
+                       RecipeViewSet, ShoppingCartViewSet, TagViewSet)
 from django.contrib import admin
-from django.urls import path, include
-from api.views import (
-    CustomUserViewSet,
-    TagViewSet,
-    RecipeViewSet,
-    IngredientViewSet,
-    FavoriteViewSet,
-    ShoppingCartViewSet,
-)
-
+from django.urls import include, path
+from rest_framework import routers
 
 router_v1 = routers.DefaultRouter()
 router_v1.register(r"users", CustomUserViewSet, basename="users")

@@ -2,23 +2,15 @@ import base64
 import uuid
 
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
-from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.core.files.base import ContentFile
-from rest_framework.fields import SerializerMethodField
 from django.db.transaction import atomic
-from rest_framework.validators import UniqueTogetherValidator
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from recipes.models import (Favorite, Ingredient, IngredientRecipes, Recipe,
+                            ShoppingCart, Tag)
+from rest_framework import serializers
 from rest_framework.fields import IntegerField, SerializerMethodField
-
-from recipes.models import (
-    Tag,
-    IngredientRecipes,
-    Ingredient,
-    Recipe,
-    Favorite,
-    ShoppingCart,
-)
+from rest_framework.serializers import ModelSerializer
+from rest_framework.validators import UniqueTogetherValidator
 from users.models import Subscription
 
 User = get_user_model()

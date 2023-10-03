@@ -1,44 +1,25 @@
 from http import HTTPStatus
+
+from api.filters import IngredientFilter, RecipeFilter
+from api.pagination import CustomPagination
+from api.permissions import AuthorOrReadOnly
+from api.serializers import (CustomUserSerializer, FavoriteSerializer,
+                             IngredientSerializer, RecipeCreateSerializer,
+                             RecipeSerializer, RecipeShortSerializer,
+                             ShoppingCartSerializer, SubscriptionSerializer,
+                             TagSerializer)
+from api.utils import create_shopping_cart
+from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
-from djoser.views import UserViewSet
-from rest_framework import (
-    status,
-    viewsets,
-    exceptions,
-    response,
-    decorators,
-    permissions,
-)
-from djoser.serializers import SetPasswordSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-
-from api.serializers import (
-    TagSerializer,
-    RecipeSerializer,
-    IngredientSerializer,
-    RecipeCreateSerializer,
-    CustomUserSerializer,
-    RecipeShortSerializer,
-    FavoriteSerializer,
-    ShoppingCartSerializer,
-    SubscriptionSerializer,
-)
-from recipes.models import (
-    Tag,
-    Recipe,
-    Ingredient,
-    Favorite,
-    IngredientRecipes,
-    ShoppingCart,
-)
+from djoser.serializers import SetPasswordSerializer
+from djoser.views import UserViewSet
+from recipes.models import (Favorite, Ingredient, IngredientRecipes, Recipe,
+                            ShoppingCart, Tag)
+from rest_framework import (decorators, exceptions, permissions, response,
+                            status, viewsets)
 from users.models import Subscription
-from api.permissions import AuthorOrReadOnly
-from api.filters import RecipeFilter, IngredientFilter
-from api.utils import create_shopping_cart
-from api.pagination import CustomPagination
-
 
 User = get_user_model()
 
