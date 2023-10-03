@@ -157,8 +157,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientRecipesSerializer(ModelSerializer):
     """
     Сериалайзер для модели IngredientRecipes.
-    Используется для коректного отображения 
-    полей ингредиента при чтении.
     """
 
     id = serializers.ReadOnlyField(

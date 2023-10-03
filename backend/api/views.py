@@ -95,7 +95,9 @@ class CustomUserViewSet(UserViewSet):
                 self.request.user.save()
                 return response.Response(status=204)
             else:
-                return response.Response({"detail": "Пароли не совпадают."}, status=400)
+                return response.Response(
+                    {"detail": "Пароли не совпадают."},
+                    status=400)
         else:
             return response.Response(serializer.errors, status=400)
 
@@ -115,25 +117,32 @@ class CustomUserViewSet(UserViewSet):
         return self.get_paginated_response(serializer.data)
 
     @decorators.action(
-        methods=["POST", "DELETE"], detail=True, serializer_class=SubscriptionSerializer
+        methods=["POST", "DELETE"],
+        detail=True,
+        serializer_class=SubscriptionSerializer
     )
     def subscribe(self, request, id=None):
         user = self.request.user
         author = get_object_or_404(User, pk=id)
         if self.request.method == "POST":
             if user == author:
-                raise exceptions.ValidationError("Нельзя подписаться на самого себя")
+                raise exceptions.ValidationError(
+                    "Нельзя подписаться на самого себя")
             if Subscription.objects.filter(user=user, author=author).exists():
-                raise exceptions.ValidationError("На этого автора уже есть подписка")
+                raise exceptions.ValidationError(
+                    "На этого автора уже есть подписка")
             Subscription.objects.create(user=user, author=author)
             serializer = self.get_serializer(author)
 
-            return response.Response(serializer.data, status=HTTPStatus.CREATED)
+            return response.Response(serializer.data,
+                                     status=HTTPStatus.CREATED)
 
         if self.request.method == "DELETE":
             if not Subscription.objects.filter(user=user, author=author).exists():
-                raise exceptions.ValidationError("Нет такой подписки")
-            subscription = get_object_or_404(Subscription, user=user, author=author)
+                raise exceptions.ValidationError(
+                    "Нет такой подписки")
+            subscription = get_object_or_404(
+                Subscription, user=user, author=author)
             subscription.delete()
 
             return response.Response(status=HTTPStatus.NO_CONTENT)
@@ -166,7 +175,8 @@ class FavoriteViewSet(viewsets.ViewSet):
             return response.Response(
                 favorite_serializer.data, status=status.HTTP_201_CREATED
             )
-        favorite_recipe = get_object_or_404(Favorite, user=request.user, recipe=recipe)
+        favorite_recipe = get_object_or_404(Favorite,
+                                            user=request.user, recipe=recipe)
         favorite_recipe.delete()
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -201,7 +211,8 @@ class ShoppingCartViewSet(viewsets.ViewSet):
             ShoppingCart, user=request.user, recipe=recipe
         )
         shopping_cart_recipe.delete()
-        return response.Response(status=status.HTTP_204_NO_CONTENT)
+        return response.Response(
+            status=status.HTTP_204_NO_CONTENT)
 
     @decorators.action(
         detail=False,
@@ -212,7 +223,8 @@ class ShoppingCartViewSet(viewsets.ViewSet):
     )
     def download_shopping_cart(self, request):
         ingredients_cart = (
-            IngredientRecipes.objects.filter(recipe__shopping_cart__user=request.user)
+            IngredientRecipes.objects.filter(
+                recipe__shopping_cart__user=request.user)
             .values(
                 "ingredient__name",
                 "ingredient__measurement_unit",

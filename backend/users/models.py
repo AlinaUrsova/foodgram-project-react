@@ -24,8 +24,10 @@ class User(AbstractUser):
     email = models.EmailField(
         verbose_name="E-mail", max_length=254, unique=True, blank=False
     )
-    first_name = models.CharField(verbose_name="Имя", max_length=150, blank=False)
-    last_name = models.CharField(verbose_name="Фамилия", max_length=150, blank=False)
+    first_name = models.CharField(verbose_name="Имя",
+                                  max_length=150, blank=False)
+    last_name = models.CharField(verbose_name="Фамилия",
+                                 max_length=150, blank=False)
     password = models.CharField(
         verbose_name="Пароль",
         max_length=150,
@@ -48,7 +50,9 @@ class Subscription(models.Model):
         related_name="follower",
     )
     author = models.ForeignKey(
-        User, verbose_name="Автор", on_delete=models.CASCADE, related_name="following"
+        User, verbose_name="Автор",
+        on_delete=models.CASCADE,
+        related_name="following"
     )
 
     class Meta:

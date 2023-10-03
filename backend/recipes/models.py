@@ -8,7 +8,7 @@ class Tag(models.Model):
 
     name = models.CharField(verbose_name="Название", max_length=200)
     color = models.CharField(verbose_name="Цвет", max_length=7)
-    slug = models.CharField(verbose_name="Уникальный слаг", 
+    slug = models.CharField(verbose_name="Уникальный слаг",
                             max_length=200, unique=True)
 
 
@@ -51,8 +51,8 @@ class Recipe(models.Model):
         validators=(
             MinValueValidator(
                 limit_value=1,
-                message=f"Время приготовления не"
-                f"может быть менее одной минуты.",
+                message=
+                "Время не меньше минуты.",
             ),
         ),
     )

@@ -14,14 +14,16 @@ urlpatterns = [
     path(
         "recipes/<int:pk>/favorite/",
         FavoriteViewSet.as_view(
-            {"post": "add_and_delete_favorite", "delete": "add_and_delete_favorite"}
+            {"post": "add_and_delete_favorite",
+             "delete": "add_and_delete_favorite"}
         ),
         name="add_favorite-remove_favorite",
     ),
     path(
         "recipes/<int:pk>/shopping_cart/",
         ShoppingCartViewSet.as_view(
-            {"post": "action_recipe_in_cart", "delete": "action_recipe_in_cart"}
+            {"post": "action_recipe_in_cart",
+             "delete": "action_recipe_in_cart"}
         ),
         name="add_shopping_cart-remove_shopping_cart",
     ),
