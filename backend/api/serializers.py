@@ -272,23 +272,25 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     @atomic
     def create(self, validated_data):
-        tags = validated_data.pop("tags")
-        ingredients = validated_data.pop("ingredients")
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-        self.create_ingredients(recipe=recipe, ingredients=ingredients)
+        request = self.context.get('request')
+        ingredients_data = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
+        recipe = Recipe.objects.create(author=request.user, **validated_data)
+        recipe.tags.set(tags_data)
+        self.create_bulk(recipe, ingredients_data)
         return recipe
 
     @atomic
     def update(self, instance, validated_data):
-        tags = validated_data.pop("tags")
-        ingredients = validated_data.pop("ingredients")
-        instance = super(RecipeCreateSerializer,
-                         self).update(instance, validated_data)
-        instance.tags.set(tags)
-        self.create_ingredients(recipe=instance,
-                                ingredients=ingredients)
+        ingredients_data = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
+        IngredientRecipes.objects.filter(recipe=instance).delete()
+        self.create_bulk(instance, ingredients_data)
+        super().update(instance, validated_data)
+        if validated_data.get('image') is not None:
+            instance.image = validated_data.pop('image')
         instance.save()
+        instance.tags.set(tags_data)
         return instance
 
     def to_representation(self, instance):
