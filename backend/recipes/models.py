@@ -77,13 +77,13 @@ class IngredientRecipes(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name="ingredient",
+        related_name='amount_ingredients',
         verbose_name="Ингредиент",
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name="amount_ingredients",
+        related_name='amount_ingredients',
         verbose_name="Рецепт",
     )
     amount = models.PositiveSmallIntegerField(
@@ -98,6 +98,10 @@ class IngredientRecipes(models.Model):
         verbose_name_plural = "Ингредиенты"
         ordering = ("id",)
         unique_together = ("recipe", "ingredient")
+    
+    def __str__(self):
+        return (f'{self.ingredient.name}, {self.amount}'
+                f'{self.ingredient.measurement_unit}')
 
 
 class Favorite(models.Model):

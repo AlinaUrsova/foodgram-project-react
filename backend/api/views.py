@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
-from api.permissions import AuthorOrReadOnly
+from api.permissions import AuthorOrReadOnly, SAFE_METHODS
 from api.serializers import (CustomUserSerializer, FavoriteSerializer,
                              IngredientSerializer, RecipeCreateSerializer,
                              RecipeSerializer, RecipeShortSerializer,
@@ -48,6 +48,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для создания обьектов класса Recipe."""
 
+    #queryset = Recipe.objects.all()
     permission_classes = [
         AuthorOrReadOnly,
     ]
@@ -68,9 +69,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def get_serializer_class(self):
-        if self.request.method == "GET":
-            return RecipeCreateSerializer
-        return RecipeSerializer
+        if self.request.method in SAFE_METHODS:
+            return RecipeSerializer
+        return RecipeCreateSerializer
 
 
 class CustomUserViewSet(UserViewSet):
