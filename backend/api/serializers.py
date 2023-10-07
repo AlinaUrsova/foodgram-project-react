@@ -52,10 +52,13 @@ class CustomUserSerializer(UserSerializer):
                   "is_subscribed")
 
     def get_is_subscribed(self, obj):
-        user = self.context["request"].user
-        if user.is_anonymous:
+        user = self.context.get('request').user
+        if user is None or user.is_anonymous:
             return False
-        return Subscription.objects.filter(user=user, author=obj).exists()
+        return Subscription.objects.filter(
+            user=user,
+            author=obj
+        ).exists()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -81,14 +84,38 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         return data
 
 
+class RecipeShortSerializer(serializers.ModelSerializer):
+    """Сериализатор компактного отображения рецептов."""
+
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = ("id", "name", "image", "cooking_time")
+
+
+class SubscriptionReadSerializer(UserSerializer):
+    """Сериализатор для модели User."""
+
+    recipes = RecipeShortSerializer(
+        many=True, read_only=True)
+    recipes_count = SerializerMethodField(read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        fields = CustomUserSerializer.Meta.fields + (
+            "recipes", "recipes_count")
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+
 class SubscriptionSerializer(ModelSerializer):
     """Сериализатор для модели Subscription."""
 
     recipes = serializers.SerializerMethodField(method_name="get_recipes")
     recipes_count = serializers.SerializerMethodField(
         method_name="get_recipes_count",
-        read_only=True,
-    )
+        read_only=True,)
 
     def get_recipes(self, obj):
         author_recipes = Recipe.objects.filter(author=obj)
@@ -112,32 +139,6 @@ class SubscriptionSerializer(ModelSerializer):
             "recipes",
             "recipes_count",
         )
-
-
-class RecipeSubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор работает с моделью Recipe."""
-
-    class Meta:
-        model = Recipe
-        fields = ("id", "name", "image", "cooking_time")
-
-
-class SubscriptionReadSerializer(UserSerializer):
-    """Сериализатор для модели User."""
-
-    recipes = RecipeSubscriptionSerializer(
-        many=True, read_only=True)
-    recipes_count = SerializerMethodField(read_only=True)
-
-    class Meta(UserSerializer.Meta):
-        fields = CustomUserSerializer.Meta.fields + (
-            "recipes", "recipes_count")
-
-    def get_recipes_count(self, obj):
-        """Метод возвращает количество рецептов у автора рецептов
-        на которого подписался пользователь.
-        """
-        return obj.recipes.count()
 
 
 class TagSerializer(ModelSerializer):
@@ -297,15 +298,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return RecipeSerializer(
             instance, context={"request": self.context.get("request")}
         ).data
-
-
-class RecipeShortSerializer(serializers.ModelSerializer):
-    """Сериализатор компактного отображения рецептов."""
-
-    class Meta:
-        model = Recipe
-        fields = ("id", "name", "image", "cooking_time")
-
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор модели Favorite."""

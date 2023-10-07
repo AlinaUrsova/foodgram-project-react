@@ -23,7 +23,10 @@ INSTALLED_APPS = [
     "recipes.apps.RecipesConfig",
     "api.apps.ApiConfig",
     "users.apps.UsersConfig",
+    'import_export',
 ]
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

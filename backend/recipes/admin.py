@@ -1,7 +1,7 @@
 from django.contrib import admin
 from recipes.models import (Favorite, Ingredient, IngredientRecipes, Recipe,
                             ShoppingCart, Tag)
-
+from import_export.admin import ImportExportModelAdmin
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -44,7 +44,7 @@ class ReceptAdmin(admin.ModelAdmin):
 
 
 @admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
+class IngredientAdmin(ImportExportModelAdmin):
     list_display = (
         "name",
         "measurement_unit",
