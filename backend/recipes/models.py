@@ -8,8 +8,9 @@ class Tag(models.Model):
 
     name = models.CharField(verbose_name="Название", max_length=200)
     color = models.CharField(verbose_name="Цвет", max_length=7)
-    slug = models.CharField(verbose_name="Уникальный слаг",
-                            max_length=200, unique=True)
+    slug = models.CharField(
+        verbose_name="Уникальный слаг",
+        max_length=200, unique=True)
 
 
 class Ingredient(models.Model):
@@ -26,7 +27,8 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     """Модель Рецепта."""
 
-    tags = models.ManyToManyField(Tag, related_name="recipes",
+    tags = models.ManyToManyField(Tag,
+                                  related_name="recipes",
                                   verbose_name="Тэги")
     author = models.ForeignKey(
         User,
@@ -77,13 +79,13 @@ class IngredientRecipes(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='amount_ingredients',
+        related_name="amount_ingredients",
         verbose_name="Ингредиент",
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='amount_ingredients',
+        related_name="amount_ingredients",
         verbose_name="Рецепт",
     )
     amount = models.PositiveSmallIntegerField(
@@ -98,10 +100,12 @@ class IngredientRecipes(models.Model):
         verbose_name_plural = "Ингредиенты"
         ordering = ("id",)
         unique_together = ("recipe", "ingredient")
-    
+
     def __str__(self):
-        return (f'{self.ingredient.name}, {self.amount}'
-                f'{self.ingredient.measurement_unit}')
+        return (
+            f"{self.ingredient.name}, {self.amount}"
+            f"{self.ingredient.measurement_unit}"
+        )
 
 
 class Favorite(models.Model):
