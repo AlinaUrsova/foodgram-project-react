@@ -8,7 +8,6 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from recipes.models import (Favorite, Ingredient, IngredientRecipes, Recipe,
                             ShoppingCart, Tag)
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -72,14 +71,14 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
     def validate(self, data):
         if data.get("username") == "me":
-            raise serializers.ValidationError("Использовать имя me запрещено")
+            raise serializers.ValidationError("Нельзя использовать имя me")
         if User.objects.filter(username=data.get("username")):
             raise serializers.ValidationError(
-                "Пользователь с таким username уже существует"
+                "Пользователь с таким именем уже существует"
             )
         if User.objects.filter(email=data.get("email")):
             raise serializers.ValidationError(
-                "Пользователь с таким email уже существует"
+                "Эта почта уже зарегистрироана"
             )
         return data
 
@@ -94,51 +93,25 @@ class RecipeShortSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "image", "cooking_time")
 
 
-class SubscriptionReadSerializer(UserSerializer):
-    """Сериализатор для модели User."""
-
-    recipes = RecipeShortSerializer(
-        many=True, read_only=True)
-    recipes_count = SerializerMethodField(read_only=True)
-
-    class Meta(UserSerializer.Meta):
-        fields = CustomUserSerializer.Meta.fields + (
-            "recipes", "recipes_count")
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
-
 class SubscriptionSerializer(ModelSerializer):
     """Сериализатор для модели Subscription."""
 
-    recipes = serializers.SerializerMethodField(method_name="get_recipes")
-    recipes_count = serializers.SerializerMethodField(
-        method_name="get_recipes_count",
-        read_only=True,)
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta(CustomUserSerializer.Meta):
+        fields = CustomUserSerializer.Meta.fields + ('recipes', 'recipes_count')
 
     def get_recipes(self, obj):
-        author_recipes = Recipe.objects.filter(author=obj)
-        if "recipes_limit" in self.context.get("request").GET:
-            recipes_limit = self.context.get("request").GET["recipes_limit"]
-            author_recipes = author_recipes[: int(recipes_limit)]
-        return []
+        recipes = obj.recipes.all()[:3]
+        request = self.context.get('request')
+        return RecipeShortSerializer(
+            recipes, many=True,
+            context={'request': request}
+        ).data
 
     def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj).count()
-
-    class Meta:
-        model = User
-        fields = (
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-            "recipes",
-            "recipes_count",
-        )
+        return obj.recipes.count()
 
 
 class TagSerializer(ModelSerializer):

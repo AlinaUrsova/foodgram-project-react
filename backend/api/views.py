@@ -1,13 +1,12 @@
 from http import HTTPStatus
 
 from api.filters import IngredientFilter, RecipeFilter
-from api.pagination import CustomPagination
 from api.permissions import AuthorOrReadOnly, SAFE_METHODS
 from api.serializers import (CustomUserSerializer, FavoriteSerializer,
                              IngredientSerializer, RecipeCreateSerializer,
                              RecipeSerializer, RecipeShortSerializer,
-                             ShoppingCartSerializer, SubscriptionSerializer,
-                             TagSerializer)
+                             ShoppingCartSerializer, TagSerializer,
+                             SubscriptionSerializer)
 from api.utils import create_shopping_cart
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
@@ -15,11 +14,11 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
 from djoser.views import UserViewSet
-from recipes.models import (Favorite, Ingredient, IngredientRecipes, Recipe,
-                            ShoppingCart, Tag)
-from rest_framework import (decorators, exceptions, permissions, response,
+from recipes.models import (Favorite, Ingredient, IngredientRecipes, Recipe, ShoppingCart, Tag)
+from rest_framework import (decorators, permissions, response,
                             status, viewsets)
 from users.models import Subscription
+from api.pagination import PageLimitPagination
 
 User = get_user_model()
 
@@ -48,7 +47,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для создания обьектов класса Recipe."""
 
-    #queryset = Recipe.objects.all()
     permission_classes = [
         AuthorOrReadOnly,
     ]
@@ -79,7 +77,7 @@ class CustomUserViewSet(UserViewSet):
 
     quryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    pagination_class = CustomPagination
+    pagination_class = PageLimitPagination
 
     @decorators.action(detail=False, methods=["POST"])
     def set_password(self, request):
@@ -102,54 +100,41 @@ class CustomUserViewSet(UserViewSet):
         else:
             return response.Response(serializer.errors, status=400)
 
-    @decorators.action(
-        detail=False,
-        methods=["GET"],
-        serializer_class=SubscriptionSerializer,
-        permission_classes=[permissions.IsAuthenticated],
-    )
-    def subscriptions(self, request):
-        user = self.request.user
-        user_subscriptions = user.follower.all()
-        authors = [item.author.id for item in user_subscriptions]
-        queryset = User.objects.filter(pk__in=authors)
-        paginated_queryset = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(paginated_queryset, many=True)
-        return self.get_paginated_response(serializer.data)
+    @decorators.action(methods=['POST', 'DELETE'],
+            detail=True, )
+    def subscribe(self, request, id):
+        user = request.user
+        author = get_object_or_404(User, id=id)
+        subscription = Subscription.objects.filter(
+            user=user, author=author)
 
-    @decorators.action(
-        methods=["POST", "DELETE"],
-        detail=True,
-        serializer_class=SubscriptionSerializer
-    )
-    def subscribe(self, request, id=None):
-        user = self.request.user
-        author = get_object_or_404(User, pk=id)
-        if self.request.method == "POST":
+        if request.method == 'POST':
+            if subscription.exists():
+                return response.Response({'error': 'Вы уже подписаны'},
+                                status=status.HTTP_400_BAD_REQUEST)
             if user == author:
-                raise exceptions.ValidationError(
-                    "Нельзя подписаться на самого себя")
-            if Subscription.objects.filter(user=user, author=author).exists():
-                raise exceptions.ValidationError(
-                    "На этого автора уже есть подписка")
+                return response.Response({'error': 'Нельзя подписаться на самого себя'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            serializer = SubscriptionSerializer(author, context={'request': request})
             Subscription.objects.create(user=user, author=author)
-            serializer = self.get_serializer(author)
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            return response.Response(serializer.data,
-                                     status=HTTPStatus.CREATED)
+        if request.method == 'DELETE':
+            if subscription.exists():
+                subscription.delete()
+                return response.Response(status=status.HTTP_204_NO_CONTENT)
+            return response.Response({'error': 'Вы не подписаны на этого пользователя'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        if self.request.method == "DELETE":
-            if not Subscription.objects.filter(user=user,
-                                               author=author).exists():
-                raise exceptions.ValidationError(
-                    "Нет такой подписки")
-            subscription = get_object_or_404(
-                Subscription, user=user, author=author)
-            subscription.delete()
-
-            return response.Response(status=HTTPStatus.NO_CONTENT)
-
-        return response.Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
+    @decorators.action(detail=False, permission_classes=[permissions.IsAuthenticated])
+    def subscriptions(self, request):
+        user = request.user
+        follows = User.objects.filter(following__user=user)
+        page = self.paginate_queryset(follows)
+        serializer = SubscriptionSerializer(
+            page, many=True,
+            context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
 
 class FavoriteViewSet(viewsets.ViewSet):

@@ -7,7 +7,7 @@ SECRET_KEY = "django-insecure-xmxou_mduygadbijlu073gdlsf^j++d!t*x1$kb37uf=f@l7z3
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '158.160.69.135', 'foodgramalina.hopto.org']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
