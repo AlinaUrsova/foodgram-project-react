@@ -60,6 +60,48 @@ python manage.py runserver
 ```
 7. Наполнить базу данных ингредиентами через администратора, через кнопку 'import'
 
+#### Запуск проекта на сервере:
+1. Собрать образы:
+```
+docker build -t username/foodgram_frontend .
+docker build -t username/foodgram_backend .
+docker build -t username/foodgram_gateway . 
+```
+2. Загрузить образы на Docker Hub:
+```
+docker push username/foodgram_frontend
+docker push username/foodgram_backend
+docker push username/foodgram_gateway  
+```
+3. Загрузить образы на Docker Hub:
+```
+docker push username/foodgram_frontend
+docker push username/foodgram_backend
+docker push username/foodgram_gateway  
+```
+4. Поочерёдно выполните на сервере команды для установки Docker и Docker Compose на удаленном сервере:
+```
+sudo apt update
+sudo apt install curl
+curl -fSL https://get.docker.com -o get-docker.sh
+sudo sh ./get-docker.sh
+sudo apt-get install docker-compose-plugin 
+```
+5. Скопируйте на сервер в директорию foodgram/ файл docker-compose.production.yml
+
+6. Скопируйте на сервер в директорию foodgram/ файл .env
+
+7. Запустите Docker Compose в режиме демона:
+```
+sudo docker compose -f docker-compose.production.yml up -d 
+```
+8. Выполните миграции, соберите статические файлы бэкенда и скопируйте их в /backend_static/static/:
+```
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+```
+
 **Проект будет досупен по адресу:**  
 https://foodgramalina.hopto.org/
 
