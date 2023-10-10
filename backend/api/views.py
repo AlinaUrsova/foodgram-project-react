@@ -117,7 +117,7 @@ class CustomUserViewSet(UserViewSet):
                     {"error": "Нельзя подписаться на самого себя"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            serializer = SubscriptionSerializer(author, 
+            serializer = SubscriptionSerializer(author,
                                                 context={"request": request})
             Subscription.objects.create(user=user, author=author)
             return response.Response(serializer.data,
