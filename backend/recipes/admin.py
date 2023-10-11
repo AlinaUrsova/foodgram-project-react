@@ -45,6 +45,7 @@ class ReceptAdmin(admin.ModelAdmin):
         "tags",
     )
 
+
 @admin.register(Ingredient)
 class IngredientAdmin(ImportExportModelAdmin):
     list_display = (

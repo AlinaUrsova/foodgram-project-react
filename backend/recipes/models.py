@@ -12,7 +12,7 @@ class Tag(models.Model):
     slug = models.CharField(
         verbose_name="Уникальный слаг",
         max_length=200, unique=True)
-    
+
 
     class Meta:
         verbose_name = "Тэг"
@@ -31,12 +31,13 @@ class Ingredient(models.Model):
     )
     measurement_unit = models.CharField(max_length=10,
                                         verbose_name="единица измерения")
-    
+
 
     class Meta:
         verbose_name = "Ингредиенты"
         verbose_name_plural = "Ингредиенты"
-    
+
+
     def __str__(self):
         return str(self.name)
 
@@ -57,8 +58,7 @@ class Recipe(models.Model):
         Ingredient,
         related_name="recipes",
         verbose_name="Ингридиенты",
-        through="IngredientRecipes",
-        )
+        through="IngredientRecipes")
     name = models.CharField("Название", max_length=200)
     image = models.ImageField(
         verbose_name="изображение",
