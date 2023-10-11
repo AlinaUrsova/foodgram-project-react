@@ -35,9 +35,9 @@ class Ingredient(models.Model):
         verbose_name = "Ингредиенты"
         verbose_name_plural = "Ингредиенты"
 
-
     def __str__(self):
         return str(self.name)
+
 
 class Recipe(models.Model):
     """Модель Рецепта."""
@@ -84,7 +84,6 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"{self.name}. Автор: {self.author.username}"
 
-
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
 
@@ -102,14 +101,12 @@ class IngredientRecipes(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         related_name="amount_ingredients",
-        verbose_name="Рецепт",
-        )
+        verbose_name="Рецепт")
     amount = models.PositiveSmallIntegerField(
         "Количество",
         validators=[
             MinValueValidator(1, "Количество должно быть равно хотя бы одному")
-        ],
-    )
+        ])
 
     class Meta:
         verbose_name = "Ингредиент в рецепте"
