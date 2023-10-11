@@ -13,7 +13,6 @@ class Tag(models.Model):
         verbose_name="Уникальный слаг",
         max_length=200, unique=True)
 
-
     class Meta:
         verbose_name = "Тэг"
         verbose_name_plural = "Тэг"
@@ -32,7 +31,6 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(max_length=10,
                                         verbose_name="единица измерения")
 
-
     class Meta:
         verbose_name = "Ингредиенты"
         verbose_name_plural = "Ингредиенты"
@@ -40,7 +38,6 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return str(self.name)
-
 
 class Recipe(models.Model):
     """Модель Рецепта."""
@@ -87,7 +84,7 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"{self.name}. Автор: {self.author.username}"
 
-    
+
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
 
@@ -106,7 +103,7 @@ class IngredientRecipes(models.Model):
         on_delete=models.CASCADE,
         related_name="amount_ingredients",
         verbose_name="Рецепт",
-    )
+        )
     amount = models.PositiveSmallIntegerField(
         "Количество",
         validators=[

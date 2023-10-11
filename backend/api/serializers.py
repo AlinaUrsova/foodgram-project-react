@@ -167,7 +167,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             "is_favorited",
             "is_in_shopping_cart",
         )
-    
+
     def validate_ingredients(self, data):
         ingredients = self.initial_data.get("ingredients")
         ingredients_list = [ingredient['id'] for ingredient in ingredients]
