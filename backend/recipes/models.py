@@ -11,10 +11,18 @@ class Tag(models.Model):
     slug = models.CharField(
         verbose_name="Уникальный слаг",
         max_length=200, unique=True)
+    
+
+    class Meta:
+        verbose_name = "Тэг"
+        verbose_name_plural = "Тэг"
+
+    def __str__(self):
+        return str(self.name)
 
 
 class Ingredient(models.Model):
-    """Модель Ингридиента."""
+    """Модель Ингредиента."""
 
     name = models.CharField(
         max_length=200,
@@ -22,6 +30,14 @@ class Ingredient(models.Model):
     )
     measurement_unit = models.CharField(max_length=10,
                                         verbose_name="единица измерения")
+    
+
+    class Meta:
+        verbose_name = "Ингредиенты"
+        verbose_name_plural = "Ингредиенты"
+
+    def __str__(self):
+        return str(self.name)
 
 
 class Recipe(models.Model):
@@ -57,8 +73,13 @@ class Recipe(models.Model):
             ),
         ),
     )
+    pub_date = models.DateTimeField(
+        "Дата рецепта",
+        auto_now_add=True,
+    )
 
     class Meta:
+        ordering = ["-pub_date"]
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
 
