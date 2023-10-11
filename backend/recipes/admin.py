@@ -20,8 +20,8 @@ class TagAdmin(admin.ModelAdmin):
 
 
 class RecipeIngredientInline(admin.TabularInline):
-    model = Recipe.ingredients.through
-    extra = 1
+    model = IngredientRecipes
+    min_num = 1
 
 
 @admin.register(Recipe)
@@ -33,7 +33,9 @@ class ReceptAdmin(admin.ModelAdmin):
     list_filter = ("author", "name", "tags")
     search_fields = ("name",)
     filter_horizontal = ("tags",)
-    inlines = (RecipeIngredientInline,)
+    inlines = [
+        RecipeIngredientInline,
+    ]
     fields = (
         "name",
         "author",
@@ -42,7 +44,6 @@ class ReceptAdmin(admin.ModelAdmin):
         "text",
         "tags",
     )
-
 
 @admin.register(Ingredient)
 class IngredientAdmin(ImportExportModelAdmin):

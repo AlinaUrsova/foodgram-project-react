@@ -51,7 +51,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     ordering_fields = ()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-
+    
     def get_queryset(self):
         recipes = Recipe.objects.prefetch_related(
             "amount_ingredients__ingredient", "tags"

@@ -167,6 +167,17 @@ class RecipeSerializer(serializers.ModelSerializer):
             "is_favorited",
             "is_in_shopping_cart",
         )
+    
+    def validate_ingredients(self, data):
+        ingredients = self.initial_data.get("ingredients")
+        ingredients_list = [ingredient['id'] for ingredient in ingredients]
+        if len(ingredients_list) != len(set(ingredients_list)):
+            raise serializers.ValidationError(
+                'Ингредиент не может повторяться!'
+            )
+        if not ingredients:
+            raise serializers.ValidationError('Необходимо указать ингредиент!')
+        return data
 
     def get_is_favorited(self, object):
         request = self.context.get("request")

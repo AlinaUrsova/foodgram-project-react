@@ -1,4 +1,5 @@
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from users.models import User
 
@@ -35,7 +36,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = "Ингредиенты"
         verbose_name_plural = "Ингредиенты"
-
+    
     def __str__(self):
         return str(self.name)
 
@@ -57,7 +58,7 @@ class Recipe(models.Model):
         related_name="recipes",
         verbose_name="Ингридиенты",
         through="IngredientRecipes",
-    )
+        )
     name = models.CharField("Название", max_length=200)
     image = models.ImageField(
         verbose_name="изображение",
@@ -86,10 +87,7 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"{self.name}. Автор: {self.author.username}"
 
-    def clean(self) -> None:
-        self.name = self.name.capitalize()
-        return super().clean()
-
+    
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
 
@@ -102,7 +100,7 @@ class IngredientRecipes(models.Model):
         on_delete=models.CASCADE,
         related_name="amount_ingredients",
         verbose_name="Ингредиент",
-    )
+        )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -117,10 +115,14 @@ class IngredientRecipes(models.Model):
     )
 
     class Meta:
-        verbose_name = "Ингредиент"
-        verbose_name_plural = "Ингредиенты"
+        verbose_name = "Ингредиент в рецепте"
+        verbose_name_plural = "Ингредиент в рецепте"
         ordering = ("id",)
         unique_together = ("recipe", "ingredient")
+    
+    def clean(self):
+        if self.amount < 0:
+            raise ValidationError('Нельзя отрицательное количество')
 
     def __str__(self):
         return (
