@@ -1,17 +1,21 @@
-from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from users.models import User
 
+MAX_LENGTH_200 = 200
+MAX_LENGTH_10 = 10
+MAX_LENGTH_7 = 7
+LIMIT_VALUE = 1
 
 class Tag(models.Model):
     """Модель Тэг."""
 
     name = models.CharField(verbose_name="Название", max_length=200)
-    color = models.CharField(verbose_name="Цвет", max_length=7)
+    color = models.CharField(verbose_name="Цвет", max_length=MAX_LENGTH_7)
     slug = models.CharField(
         verbose_name="Уникальный слаг",
-        max_length=200, unique=True)
+        max_length=MAX_LENGTH_200, unique=True)
 
     class Meta:
         verbose_name = "Тэг"
@@ -25,10 +29,10 @@ class Ingredient(models.Model):
     """Модель Ингредиента."""
 
     name = models.CharField(
-        max_length=200,
+        max_length=MAX_LENGTH_200,
         verbose_name="Hазвание",
     )
-    measurement_unit = models.CharField(max_length=10,
+    measurement_unit = models.CharField(max_length=MAX_LENGTH_10,
                                         verbose_name="единица измерения")
 
     class Meta:
@@ -56,7 +60,7 @@ class Recipe(models.Model):
         related_name="recipes",
         verbose_name="Ингридиенты",
         through="IngredientRecipes")
-    name = models.CharField("Название", max_length=200)
+    name = models.CharField("Название", max_length=MAX_LENGTH_200)
     image = models.ImageField(
         verbose_name="изображение",
         upload_to="recipes/",
@@ -66,7 +70,7 @@ class Recipe(models.Model):
         verbose_name="время приготовления, в мин",
         validators=(
             MinValueValidator(
-                limit_value=1,
+                limit_value=LIMIT_VALUE,
                 message="Время",
             ),
         ),

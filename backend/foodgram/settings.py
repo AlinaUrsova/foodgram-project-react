@@ -1,13 +1,15 @@
 import os
+from distutils.util import strtobool
+
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-xmxou_mduygadbijlu073gdlsf^j++d!t*x1$kb37uf=f@l7z3"
+SECRET_KEY = os.getenv('SECRET_KEY', default="SECRET") 
 
-DEBUG = True
+DEBUG = bool(strtobool(os.getenv("DEBUG", "False"))) 
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "158.160.69.135", "foodgramalina.hopto.org"]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",") 
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -85,7 +87,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru"
 
 TIME_ZONE = "UTC"
 
