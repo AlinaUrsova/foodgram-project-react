@@ -20,7 +20,9 @@ class User(AbstractUser):
         ),
     )
     email = models.EmailField(
-        verbose_name="E-mail", max_length=MAX_LENGTH_254, unique=True, blank=False
+        verbose_name="E-mail",
+        max_length=MAX_LENGTH_254,
+        unique=True, blank=False
     )
     first_name = models.CharField(
         verbose_name="Имя",

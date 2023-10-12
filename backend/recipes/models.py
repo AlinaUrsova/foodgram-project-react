@@ -8,6 +8,7 @@ MAX_LENGTH_10 = 10
 MAX_LENGTH_7 = 7
 LIMIT_VALUE = 1
 
+
 class Tag(models.Model):
     """Модель Тэг."""
 
