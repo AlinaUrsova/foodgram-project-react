@@ -95,8 +95,7 @@ class IngredientRecipes(models.Model):
         Ingredient,
         on_delete=models.CASCADE,
         related_name="amount_ingredients",
-        verbose_name="Ингредиент",
-        )
+        verbose_name="Ингредиент")
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -113,7 +112,7 @@ class IngredientRecipes(models.Model):
         verbose_name_plural = "Ингредиент в рецепте"
         ordering = ("id",)
         unique_together = ("recipe", "ingredient")
-    
+
     def clean(self):
         if self.amount < 0:
             raise ValidationError('Нельзя отрицательное количество')
