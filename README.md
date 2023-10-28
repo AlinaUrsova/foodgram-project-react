@@ -102,13 +102,6 @@ sudo docker compose -f docker-compose.production.yml exec backend python manage.
 sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
 ```
 
-**Проект будет досупен по адресу:**  
-https://foodgramalina.hopto.org/
-
-**Данные для администратора:**
-Логин: admin
-Email: a@a.ru  
-Password: 123
 
 ### Автор:
 Урсова Алина
